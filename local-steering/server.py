@@ -28,10 +28,18 @@ def blocks():
 
 def hidden(text, layer):
     inputs = tokenizer(text, return_tensors='pt').to(model.device)
-    with torch.no_grad():
-        out = model(**inputs, output_hidden_states=True, use_cache=False)
-    hs = out.hidden_states[layer]
-    return hs[0, -1].detach().float().cpu()
+    layer_index = layer if layer >= 0 else len(blocks()) + layer
+    captured = []
+    def capture(_module, _args, output):
+        value = output[0] if isinstance(output, tuple) else output
+        captured.append(value[0, -1].detach().float().cpu())
+    hook = blocks()[layer_index].register_forward_hook(capture)
+    try:
+        with torch.no_grad(): model(**inputs, use_cache=False)
+    finally:
+        hook.remove()
+    if not captured: raise RuntimeError('Nessuna attivazione catturata')
+    return captured[0]
 
 def make_caa(pos, neg, output, layer):
     if len(pos) != len(neg) or not pos: raise ValueError('positive e negative devono avere lo stesso numero di righe')
@@ -56,14 +64,21 @@ def generate(prompt, strength=0.0, layer=-1, max_new_tokens=256):
     return tokenizer.decode(out[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
 
 class Handler(BaseHTTPRequestHandler):
+    def send_json(self, status, payload):
+        data = json.dumps(payload).encode()
+        self.send_response(status); self.send_header('Content-Type','application/json'); self.send_header('Access-Control-Allow-Origin','*'); self.send_header('Access-Control-Allow-Headers','Content-Type'); self.send_header('Access-Control-Allow-Methods','GET, POST, OPTIONS'); self.end_headers(); self.wfile.write(data)
+    def do_OPTIONS(self):
+        self.send_response(204); self.send_header('Access-Control-Allow-Origin','*'); self.send_header('Access-Control-Allow-Headers','Content-Type'); self.send_header('Access-Control-Allow-Methods','GET, POST, OPTIONS'); self.end_headers()
+    def do_GET(self):
+        if self.path == '/health': self.send_json(200, {'ok': True, 'model': MODEL_ID, 'device': DEVICE, 'vector': VECTOR or None})
+        else: self.send_error(404)
     def do_POST(self):
         if self.path != '/generate': self.send_error(404); return
         try:
             body = json.loads(self.rfile.read(int(self.headers.get('content-length', 0))))
             text = generate(body['prompt'], float(body.get('strength', 0)), int(body.get('layer', -1)), int(body.get('max_new_tokens', 256)))
-            data = json.dumps({'text': text, 'model': MODEL_ID, 'device': DEVICE}).encode()
-            self.send_response(200); self.send_header('Content-Type','application/json'); self.send_header('Access-Control-Allow-Origin','*'); self.end_headers(); self.wfile.write(data)
-        except Exception as e: self.send_error(500, str(e))
+            self.send_json(200, {'text': text, 'model': MODEL_ID, 'device': DEVICE})
+        except Exception as e: self.send_json(500, {'error': str(e)})
     def log_message(self, *_): pass
 
 def main():

@@ -23,6 +23,17 @@ Avviare l'app tramite un piccolo server HTTP locale (consigliato invece di `file
 
 Il browser non scarica automaticamente modelli: il download resta esplicito e controllabile dall'utente.
 
+## Installazione Activation Steering su Windows
+
+La configurazione consigliata è mista: interfaccia e sorgenti possono restare sulla chiavetta, mentre ambiente Python, cache, modello e vettori vengono salvati in `%LOCALAPPDATA%\USB-GODMODE-Lab` sul PC.
+
+1. Avviare `INSTALLA-STEERING-WINDOWS.bat`.
+2. Confermare installazione e download. Sono consigliati almeno 10 GB liberi.
+3. Al termine usare `AVVIA-STEERING-WINDOWS.bat`.
+4. Nell'interfaccia scegliere `Activation Steering locale`, attivare `A/B` e selezionare una o più intensità.
+
+Il programma usa `Qwen/Qwen2.5-1.5B-Instruct` e crea un vettore CAA dimostrativo orientato a risposte più dirette, precise e verificabili. Il risultato è sperimentale e dipende dal modello e dall'intensità.
+
 ## Limiti e privacy
 
 La chiave OpenRouter resta nel browser solo se si seleziona l'opzione “Ricorda”. Non viene inviata a questo progetto. Le richieste OpenRouter vanno al provider scelto; le richieste Ollama restano locali.
