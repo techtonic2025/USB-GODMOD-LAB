@@ -1,167 +1,113 @@
-# USB GODMOD Uncens
+# USB GODMOD LAB
 
-Interfaccia portatile, open source e senza installazione per interrogare e confrontare fino a quattro modelli AI disponibili su [OpenRouter](https://openrouter.ai/).
+Interfaccia portatile per confrontare modelli AI tramite OpenRouter, Ollama e un backend sperimentale di activation steering locale.
 
-Il progetto è pensato per essere copiato su una chiavetta USB oppure scaricato come archivio ZIP. Non contiene modelli AI e non esegue inferenze sul computer: il browser invia le richieste direttamente a OpenRouter usando la chiave API dell'utente.
+![Interfaccia USB GODMOD](assets/homepage.png)
 
-![Homepage di USB GODMOD Uncens](assets/homepage.png)
+> Progetto destinato a ricerca e valutazione. Lo steering non garantisce l'eliminazione dei rifiuti e un'intensità elevata può ridurre precisione e coerenza.
 
-> **Nota importante:** “uncensored” indica modelli descritti come poco filtrati o progettati per una maggiore libertà di risposta. Non garantisce che un modello risponda a qualsiasi richiesta: comportamento, policy e disponibilità dipendono dal modello e dal provider.
+## Funzioni
 
-## Funzioni principali
+- confronto parallelo di massimo quattro modelli OpenRouter;
+- catalogo OpenRouter aggiornabile dall'app;
+- modalità NORMAL/RAW, GODMODE e ULTRAPLINIAN LITE;
+- Steering Lab: Godmode Prompt, Contrastive, Persona/Behavior, Refusal-direction emulation, Multi-vector e Adaptive;
+- intensità 0–100 e confronto A/B RAW contro STEERED;
+- backend OpenRouter, Ollama e Activation Steering locale;
+- durata, token, costo disponibile e rilevamento euristico dei rifiuti;
+- configurazione esportabile/importabile e nessuna telemetria applicativa.
 
-- catalogo dei modelli caricato direttamente e in tempo reale da OpenRouter;
-- selezione manuale di uno, due, tre o quattro modelli;
-- filtro per mostrare soltanto modelli probabilmente uncensored o poco filtrati;
-- vista dedicata per mostrare insieme soltanto i modelli selezionati;
-- pulsante **Auto: migliori 4 uncensored**;
-- invio parallelo dello stesso prompt a tutti i modelli selezionati;
-- risposte visualizzate affiancate;
-- indicazione del modello, durata, token, costo disponibile o stimato e motivo di terminazione;
-- rilevamento euristico dei possibili rifiuti;
-- nessun backend obbligatorio e nessuna telemetria applicativa;
-- configurazione esportabile e importabile come file JSON;
-- API key mantenuta soltanto in memoria, salvo scelta esplicita dell'utente.
+## Tre modalità di esecuzione
 
-## Modalità disponibili
+### OpenRouter
 
-### NORMAL / RAW
+Non richiede modelli sul computer. Le tecniche Steering Lab sono direttive di sistema: prompt steering, non modifiche ai layer interni.
 
-Invia il prompt esattamente come messaggio dell'utente. Non aggiunge system prompt, trasformazioni, classificatori o altre istruzioni.
+### Ollama
 
-È normalmente la modalità migliore per verificare il comportamento autentico di un modello e può funzionare particolarmente bene con modelli già progettati come uncensored.
-
-### GODMODE
-
-Aggiunge una direttiva di sistema semplificata, derivata concettualmente da G0DM0D3 CLASSIC, che richiede una risposta diretta, precisa e dettagliata, riducendo preamboli, esitazioni e formulazioni eccessivamente prudenti.
-
-È la modalità più esplicitamente orientata alla permissività, ma non può eliminare i filtri applicati dal modello o dal provider.
-
-### ULTRAPLINIAN LITE
-
-Interroga parallelamente tutti i modelli selezionati con una direttiva orientata a correttezza, completezza e utilità. Mostra tutte le risposte senza utilizzare un ulteriore modello giudice, evitando una chiamata e un costo aggiuntivi.
-
-## Avvio rapido
-
-### Metodo consigliato su Windows
-
-1. Scaricare il repository tramite **Code → Download ZIP**.
-2. Estrarre l'archivio oppure copiarlo sulla chiavetta USB.
-3. Avviare `start.bat`.
-4. Inserire la propria OpenRouter API key.
-5. Premere **Aggiorna modelli**.
-6. Selezionare fino a quattro modelli, oppure premere **Auto: migliori 4 uncensored**.
-7. Scrivere il prompt, scegliere la modalità e premere **Esegui confronto**.
-
-Il launcher usa un piccolo server HTTP locale quando trova un'installazione funzionante di Python. Nessun dato viene inviato al server locale. Se Python non è disponibile, apre direttamente `index.html`.
-
-### macOS
-
-1. Scaricare ed estrarre il repository.
-2. Avviare `start.command` con un doppio clic.
-3. Se macOS blocca il primo avvio, fare clic destro sul file, scegliere **Apri** e confermare l'apertura.
-
-Il launcher rileva `python3`, avvia il server esclusivamente su `127.0.0.1:8765` e apre automaticamente il browser.
-
-### Linux
-
-Da un terminale nella cartella del progetto:
+Esegue un modello locale tramite l'API Ollama. Anche qui lo Steering Lab opera a livello di prompt.
 
 ```bash
-./start.sh
+ollama pull llama3.2:3b
+ollama serve
 ```
 
-Se il permesso eseguibile è stato perso durante l'estrazione:
+### Activation Steering locale
+
+Usa Python, PyTorch e Transformers per accedere ai transformer block. Implementa Activation Addition tramite vettore NumPy, creazione/applicazione di un vettore CAA, selezione del layer, intensità e confronto RAW/STEERED.
+
+SAE steering, PID steering e function vectors non sono ancora implementati e non vengono simulati.
+
+## Avvio portatile
+
+Per OpenRouter, copiare il progetto sulla chiavetta e avviare:
+
+- `start.bat` su Windows;
+- `start.command` su macOS;
+- `start.sh` su Linux.
+
+## Installazione completa Windows
+
+La configurazione consigliata è mista: interfaccia e sorgenti possono restare sulla chiavetta; Python, ambiente, cache, modello e vettori vengono salvati sul PC in `%LOCALAPPDATA%\USB-GODMODE-Lab`.
+
+Sono consigliati almeno 10 GB liberi e 16 GB di RAM.
+
+1. Avviare `INSTALLA-STEERING-WINDOWS.bat`.
+2. Confermare installazione e download.
+3. Il programma installa Python 3.11 quando possibile, PyTorch e Transformers.
+4. Scarica `Qwen/Qwen2.5-1.5B-Instruct`.
+5. Crea il vettore CAA dimostrativo `directness-caa.npy`.
+6. Per gli avvii successivi usare `AVVIA-STEERING-WINDOWS.bat`.
+7. Nell'interfaccia scegliere **Activation Steering locale** e **A/B: RAW vs STEERED**.
+
+Il servizio ascolta su `127.0.0.1:8787`; l'interfaccia su `127.0.0.1:8765`.
+
+## Requisiti indicativi
+
+| Configurazione | Esperienza prevista |
+|---|---|
+| 8 GB RAM, solo CPU | Possibile ma lenta; può usare molta memoria virtuale |
+| 16 GB RAM, CPU recente | Adeguata per il modello 1,5B |
+| GPU NVIDIA con 4–6 GB VRAM | Consigliata |
+| 32 GB RAM / GPU 8 GB | Esperienza più comoda |
+
+## Vettore CAA manuale
+
+Preparare due file con lo stesso numero di righe e avviare:
 
 ```bash
-chmod +x start.sh
-./start.sh
+python local-steering/server.py make-caa \
+  --positive local-steering/prompts_positive.txt \
+  --negative local-steering/prompts_negative.txt \
+  --output vectors/caa.npy \
+  --layer -1
 ```
 
-Il launcher rileva `python3` o `python`, avvia il server esclusivamente in locale e usa `xdg-open` per aprire il browser quando disponibile.
+Il vettore viene estratto e applicato allo stesso transformer block. Modello, layer e intensità influenzano fortemente il risultato.
 
-### Avvio senza launcher
+## Privacy
 
-Aprire direttamente `index.html` con un browser moderno. Alcune configurazioni possono limitare le richieste di rete provenienti da pagine `file://`; in quel caso utilizzare `start.bat` o un normale server statico locale.
+- La chiave OpenRouter resta nel browser solo selezionando “Ricorda”.
+- Le richieste OpenRouter vanno al provider selezionato.
+- Ollama e PyTorch operano localmente.
+- Non è presente telemetria applicativa.
 
-## Requisiti
-
-- Windows, macOS o Linux con un browser moderno;
-- connessione Internet;
-- account e API key OpenRouter;
-- credito OpenRouter per i modelli a pagamento, oppure scelta di endpoint gratuiti quando disponibili.
-
-Non sono necessari GPU, installazione di modelli, Node.js o un server remoto personale.
-
-## Come vengono scelti i modelli “uncensored”
-
-Il filtro usa i dati del catalogo OpenRouter aggiornato — identificativo, nome e descrizione — insieme a una graduatoria locale di famiglie note per essere più orientate alla libertà di risposta.
-
-La priorità viene data a:
-
-1. modelli esplicitamente descritti come `uncensored`, `unfiltered`, `abliterated` o `de-aligned`;
-2. Venice Uncensored / Dolphin Venice;
-3. famiglie Hermes ad alta capacità;
-4. famiglie come Cydonia, Euryale, Rocinante, MythoMax e simili, se presenti nel catalogo.
-
-Il catalogo viene aggiornato quando si preme **Aggiorna modelli**. La graduatoria è euristica e non costituisce una garanzia sul comportamento futuro.
-
-### Visualizzare la selezione finale
-
-È possibile cercare e selezionare i modelli uno alla volta. Al termine, attivare **Mostra solo i modelli selezionati**: la ricerca viene azzerata e l'elenco mostra insieme esclusivamente i modelli scelti. Lo stesso elenco appare anche nel menu sotto il prompt, dal quale si può interrogare un solo modello oppure tutti quelli selezionati.
-
-## Costi
-
-Ogni modello interrogato rappresenta una richiesta distinta. Se vengono selezionati quattro modelli, OpenRouter può addebitare quattro inferenze.
-
-L'interfaccia mostra:
-
-- token di input e output restituiti dall'API;
-- costo comunicato dalla risposta, quando presente;
-- in alternativa, una stima basata sui prezzi pubblicati nel catalogo OpenRouter.
-
-Si raccomanda di creare una chiave dedicata con un limite di spesa.
-
-## Privacy e sicurezza
-
-- Il progetto non contiene telemetria applicativa.
-- Prompt e risposte non vengono salvati dall'applicazione.
-- Le richieste vengono inviate direttamente dal browser a OpenRouter.
-- La chiave API non è inclusa nel codice o nei file di configurazione esportati.
-- L'opzione **Ricorda la chiave** è disattivata per impostazione predefinita.
-- Se attivata, la chiave viene salvata nel `localStorage` del profilo browser in uso.
-- OpenRouter e i provider dei modelli applicano le proprie condizioni e politiche di trattamento dei dati.
-
-Su computer condivisi non attivare il salvataggio della chiave. In caso di compromissione o smarrimento, revocarla immediatamente dal proprio account OpenRouter.
-
-## Portabilità della configurazione
-
-Il `localStorage` appartiene al browser e non alla chiavetta USB. I pulsanti **Esporta** e **Importa** permettono di trasferire la selezione dei modelli e la modalità tramite un file JSON. La API key non viene mai inclusa nell'esportazione.
-
-## Struttura del progetto
+## Struttura
 
 ```text
-USB-GODMOD-Uncens/
-├── index.html                 # Applicazione completa HTML/CSS/JavaScript
-├── start.bat                  # Launcher Windows
-├── start.command              # Launcher macOS
-├── start.sh                   # Launcher Linux
-├── README.md                  # Documentazione principale
-├── README-PORTABLE.md         # Note operative per la versione portatile
-├── LICENSE                    # GNU AGPL v3.0
-└── THIRD_PARTY_NOTICES.md     # Attribuzioni
+index.html                         interfaccia completa
+start.bat / start.sh              avvio portatile
+INSTALLA-STEERING-WINDOWS.bat      installazione mista
+AVVIA-STEERING-WINDOWS.bat         avvio completo
+local-steering/server.py           servizio PyTorch
+local-steering/requirements.txt    dipendenze Python
+local-steering/prompts_*.txt       coppie dimostrative CAA
 ```
 
-## Progetto di origine
+## Stato
 
-Questa variante è derivata e semplificata a partire dal progetto open-source [elder-plinius/G0DM0D3](https://github.com/elder-plinius/G0DM0D3). Riutilizza concetti dell'interfaccia, del trasporto OpenRouter e delle modalità comparative, concentrandosi su un flusso portatile essenziale.
-
-Non è un prodotto ufficiale di OpenRouter e non è affiliato o approvato da OpenRouter.
+OpenRouter e prompt steering sono utilizzabili direttamente. Ollama richiede un'installazione locale. Activation Steering è sperimentale e va validato sull'hardware e sul modello scelti.
 
 ## Licenza
 
-Il progetto è distribuito secondo la **GNU Affero General Public License v3.0**. Le opere derivate e le modifiche distribuite devono rispettare i termini della medesima licenza. Consultare [LICENSE](LICENSE) e [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Uso responsabile
-
-L'utente è responsabile dei prompt inviati, delle risposte ottenute, dei costi generati e del rispetto delle leggi, delle condizioni di OpenRouter e delle condizioni applicabili ai singoli provider.
+AGPL-3.0. Vedere `LICENSE` e `THIRD_PARTY_NOTICES.md`.
