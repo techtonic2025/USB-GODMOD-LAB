@@ -1,79 +1,91 @@
 # USB GODMOD LAB
 
-Interfaccia portatile per confrontare modelli AI tramite OpenRouter, Ollama e un backend sperimentale di activation steering locale.
+An experimental portable interface for comparing AI models through OpenRouter, Ollama, and a local activation-steering service.
 
-![Interfaccia USB GODMOD](assets/homepage.png)
+![USB GODMOD interface](assets/homepage.png)
 
-> Progetto destinato a ricerca e valutazione. Lo steering non garantisce l'eliminazione dei rifiuti e un'intensità elevata può ridurre precisione e coerenza.
+> This project is intended for research, comparison, and evaluation. Steering does not guarantee that safeguards or refusals disappear. Excessive steering strength can reduce accuracy, coherence, or output quality.
 
-## Funzioni
+## Features
 
-- confronto parallelo di massimo quattro modelli OpenRouter;
-- catalogo OpenRouter aggiornabile dall'app;
-- modalità NORMAL/RAW, GODMODE e ULTRAPLINIAN LITE;
-- Steering Lab: Godmode Prompt, Contrastive, Persona/Behavior, Refusal-direction emulation, Multi-vector e Adaptive;
-- intensità 0–100 e confronto A/B RAW contro STEERED;
-- backend OpenRouter, Ollama e Activation Steering locale;
-- durata, token, costo disponibile e rilevamento euristico dei rifiuti;
-- configurazione esportabile/importabile e nessuna telemetria applicativa.
+- Compare up to four OpenRouter models in parallel.
+- Refresh the OpenRouter model catalogue from the application.
+- `NORMAL / RAW`, `GODMODE`, and `ULTRAPLINIAN LITE` modes.
+- Steering Lab controls for Godmode Prompt, Contrastive, Persona/Behavior, Refusal-direction emulation, Multi-vector, and Adaptive prompting.
+- Per-technique strength controls from 0 to 100.
+- A/B comparison of RAW versus STEERED output.
+- OpenRouter, Ollama, and local Activation Steering backends.
+- Response time, token usage, available/estimated cost, and heuristic refusal detection.
+- Importable and exportable configuration.
+- No application telemetry.
 
-## Tre modalità di esecuzione
+## Backends
 
 ### OpenRouter
 
-Non richiede modelli sul computer. Le tecniche Steering Lab sono direttive di sistema: prompt steering, non modifiche ai layer interni.
+OpenRouter does not require local models. Steering Lab settings are sent as system instructions, so this is **prompt steering**, not access to internal model activations.
 
 ### Ollama
 
-Esegue un modello locale tramite l'API Ollama. Anche qui lo Steering Lab opera a livello di prompt.
+Ollama runs an installed local model through its local API. The interface still applies Steering Lab settings at prompt level.
+
+Example:
 
 ```bash
 ollama pull llama3.2:3b
 ollama serve
 ```
 
-### Activation Steering locale
+### Local Activation Steering
 
-Usa Python, PyTorch e Transformers per accedere ai transformer block. Implementa Activation Addition tramite vettore NumPy, creazione/applicazione di un vettore CAA, selezione del layer, intensità e confronto RAW/STEERED.
+The `local-steering` module uses Python, PyTorch, and Transformers to access transformer blocks in a local Hugging Face model. It supports:
 
-SAE steering, PID steering e function vectors non sono ancora implementati e non vengono simulati.
+- Activation Addition using a NumPy vector.
+- CAA, Contrastive Activation Addition, vector generation and application.
+- Layer selection and adjustable steering strength.
+- RAW versus STEERED comparison from the interface.
 
-## Avvio portatile
+SAE steering, PID steering, and function vectors are not implemented. They are not simulated or labelled as real activation-steering methods.
 
-Per OpenRouter, copiare il progetto sulla chiavetta e avviare:
+## Portable use
 
-- `start.bat` su Windows;
-- `start.command` su macOS;
-- `start.sh` su Linux.
+For OpenRouter-only use, copy the repository to a USB drive and launch:
 
-## Installazione completa Windows
+- `start.bat` on Windows;
+- `start.command` on macOS;
+- `start.sh` on Linux.
 
-La configurazione consigliata è mista: interfaccia e sorgenti possono restare sulla chiavetta; Python, ambiente, cache, modello e vettori vengono salvati sul PC in `%LOCALAPPDATA%\USB-GODMODE-Lab`.
+## Full Windows setup
 
-Sono consigliati almeno 10 GB liberi e 16 GB di RAM.
+The recommended setup is mixed:
 
-1. Avviare `INSTALLA-STEERING-WINDOWS.bat`.
-2. Confermare installazione e download.
-3. Il programma installa Python 3.11 quando possibile, PyTorch e Transformers.
-4. Scarica `Qwen/Qwen2.5-1.5B-Instruct`.
-5. Crea il vettore CAA dimostrativo `directness-caa.npy`.
-6. Per gli avvii successivi usare `AVVIA-STEERING-WINDOWS.bat`.
-7. Nell'interfaccia scegliere **Activation Steering locale** e **A/B: RAW vs STEERED**.
+- Keep the interface and source files on a USB drive if desired.
+- Store Python, the virtual environment, Hugging Face cache, model, and steering vectors on the PC in `%LOCALAPPDATA%\USB-GODMODE-Lab`.
 
-Il servizio ascolta su `127.0.0.1:8787`; l'interfaccia su `127.0.0.1:8765`.
+At least 10 GB of free disk space and 16 GB of RAM are recommended.
 
-## Requisiti indicativi
+1. Run `INSTALLA-STEERING-WINDOWS.bat`.
+2. Confirm the installation and download.
+3. The script installs Python 3.11 when possible, then PyTorch and Transformers.
+4. It downloads `Qwen/Qwen2.5-1.5B-Instruct`.
+5. It creates the demonstration CAA vector `directness-caa.npy`.
+6. Use `AVVIA-STEERING-WINDOWS.bat` for later launches.
+7. In the interface select **Local Activation Steering** and enable **A/B: RAW vs STEERED**.
 
-| Configurazione | Esperienza prevista |
+The local service runs on `127.0.0.1:8787`; the interface runs on `127.0.0.1:8765`.
+
+## Hardware guidance
+
+| Configuration | Expected experience |
 |---|---|
-| 8 GB RAM, solo CPU | Possibile ma lenta; può usare molta memoria virtuale |
-| 16 GB RAM, CPU recente | Adeguata per il modello 1,5B |
-| GPU NVIDIA con 4–6 GB VRAM | Consigliata |
-| 32 GB RAM / GPU 8 GB | Esperienza più comoda |
+| 8 GB RAM, CPU only | Possible but slow; significant paging may occur |
+| 16 GB RAM, recent CPU | Suitable for the 1.5B model |
+| NVIDIA GPU with 4-6 GB VRAM | Recommended |
+| 32 GB RAM / 8 GB GPU | More comfortable |
 
-## Vettore CAA manuale
+## Manual CAA vector creation
 
-Preparare due file con lo stesso numero di righe e avviare:
+Prepare two text files with the same number of lines: positive and negative contrastive examples. Then run:
 
 ```bash
 python local-steering/server.py make-caa \
@@ -83,31 +95,31 @@ python local-steering/server.py make-caa \
   --layer -1
 ```
 
-Il vettore viene estratto e applicato allo stesso transformer block. Modello, layer e intensità influenzano fortemente il risultato.
+The vector is extracted from and applied to the same transformer block. Results depend strongly on the model, selected layer, prompt, and steering strength.
 
 ## Privacy
 
-- La chiave OpenRouter resta nel browser solo selezionando “Ricorda”.
-- Le richieste OpenRouter vanno al provider selezionato.
-- Ollama e PyTorch operano localmente.
-- Non è presente telemetria applicativa.
+- The OpenRouter key is kept in the browser only when the user selects “Remember”.
+- OpenRouter requests are sent to the selected provider.
+- Ollama and the PyTorch service run locally.
+- The application does not include telemetry.
 
-## Struttura
+## Project structure
 
 ```text
-index.html                         interfaccia completa
-start.bat / start.sh              avvio portatile
-INSTALLA-STEERING-WINDOWS.bat      installazione mista
-AVVIA-STEERING-WINDOWS.bat         avvio completo
-local-steering/server.py           servizio PyTorch
-local-steering/requirements.txt    dipendenze Python
-local-steering/prompts_*.txt       coppie dimostrative CAA
+index.html                         Main interface
+start.bat / start.sh              Portable launchers
+INSTALLA-STEERING-WINDOWS.bat      Mixed local installation
+AVVIA-STEERING-WINDOWS.bat         Full local launcher
+local-steering/server.py           PyTorch activation-steering service
+local-steering/requirements.txt    Python dependencies
+local-steering/prompts_*.txt       Demonstration CAA prompt pairs
 ```
 
-## Stato
+## Status
 
-OpenRouter e prompt steering sono utilizzabili direttamente. Ollama richiede un'installazione locale. Activation Steering è sperimentale e va validato sull'hardware e sul modello scelti.
+OpenRouter and prompt steering can be used directly. Ollama requires a local Ollama installation. Local Activation Steering is experimental and should be validated on the target hardware and model before general use.
 
-## Licenza
+## License
 
-AGPL-3.0. Vedere `LICENSE` e `THIRD_PARTY_NOTICES.md`.
+AGPL-3.0. See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
